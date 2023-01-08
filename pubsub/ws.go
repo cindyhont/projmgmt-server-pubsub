@@ -56,7 +56,7 @@ func runWS(res http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 			}
 
 			for conn := range connections {
-				if conn != &myConn {
+				if conn == &myConn {
 					continue
 				}
 				w := wsutil.NewWriter(*conn, ws.StateServerSide, ws.OpText)
