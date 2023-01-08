@@ -14,6 +14,8 @@ import (
 
 var connections = map[*net.Conn]bool{}
 
+var count = 0
+
 func runWS(res http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	conn, _, _, err := ws.UpgradeHTTP(req, res)
 	if err != nil {
@@ -22,7 +24,9 @@ func runWS(res http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 
 	connections[&conn] = true
 
-	fmt.Println(&conn)
+	count++
+
+	fmt.Println(count, ": ", &conn)
 
 	go func() {
 		defer delete(connections, &conn)
@@ -53,9 +57,10 @@ func runWS(res http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 
 			for connection := range connections {
 				if connection == &conn {
+					fmt.Println("same as conn: ", &conn)
 					continue
 				}
-				fmt.Println(&conn)
+
 				w := wsutil.NewWriter(conn, ws.StateServerSide, ws.OpText)
 				e := json.NewEncoder(w)
 				e.Encode(msg)
