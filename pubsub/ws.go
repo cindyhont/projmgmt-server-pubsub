@@ -56,18 +56,16 @@ func runWS(res http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 			}
 
 			for connection := range connections {
-				if connection == &conn {
-					fmt.Println("same as conn: ", connection)
-					continue
-				}
-				fmt.Println("diff from conn: ", connection)
-				w := wsutil.NewWriter(conn, ws.StateServerSide, ws.OpText)
-				e := json.NewEncoder(w)
-				e.Encode(msg)
+				if connection != &conn {
+					fmt.Println("diff from conn: ", connection)
+					w := wsutil.NewWriter(conn, ws.StateServerSide, ws.OpText)
+					e := json.NewEncoder(w)
+					e.Encode(msg)
 
-				if err := w.Flush(); err != nil {
-					fmt.Println(err)
-					return
+					if err := w.Flush(); err != nil {
+						fmt.Println(err)
+						return
+					}
 				}
 			}
 		}
