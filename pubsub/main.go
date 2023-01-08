@@ -1,6 +1,7 @@
 package pubsub
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 
@@ -16,5 +17,8 @@ func init() {
 func Listen() {
 	go pingWebsocket()
 	Router.GET("/", runWS)
-	http.ListenAndServe(":"+os.Getenv("PROJMGMT_SERVER_PUBSUB_PORT"), Router)
+	err := http.ListenAndServe(":"+os.Getenv("PROJMGMT_SERVER_PUBSUB_PORT"), Router)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
