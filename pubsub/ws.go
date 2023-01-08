@@ -17,22 +17,22 @@ var connections = map[*net.Conn]bool{}
 var count = 0
 
 func runWS(res http.ResponseWriter, req *http.Request, _ httprouter.Params) {
-	conn, _, _, err := ws.UpgradeHTTP(req, res)
+	myConn, _, _, err := ws.UpgradeHTTP(req, res)
 	if err != nil {
 		return
 	}
 
-	connections[&conn] = true
+	connections[&myConn] = true
 
 	count++
 
-	fmt.Println(count, ": ", &conn)
+	fmt.Println(count, ": ", &myConn)
 
 	go func() {
-		defer delete(connections, &conn)
+		defer delete(connections, &myConn)
 
 		var (
-			r       = wsutil.NewReader(conn, ws.StateServerSide)
+			r       = wsutil.NewReader(myConn, ws.StateServerSide)
 			decoder = json.NewDecoder(r)
 		)
 
@@ -55,11 +55,11 @@ func runWS(res http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 				continue
 			}
 
-			for connection := range connections {
-				if connection != &conn {
+			for conn := range connections {
+				if conn != &myConn {
 					continue
 				}
-				w := wsutil.NewWriter(*connection, ws.StateServerSide, ws.OpText)
+				w := wsutil.NewWriter(*conn, ws.StateServerSide, ws.OpText)
 				e := json.NewEncoder(w)
 				e.Encode(msg)
 
