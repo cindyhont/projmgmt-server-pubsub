@@ -14,8 +14,6 @@ import (
 
 var connections = map[*net.Conn]bool{}
 
-var count = 0
-
 func runWS(res http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	myConn, _, _, err := ws.UpgradeHTTP(req, res)
 	if err != nil {
@@ -23,10 +21,6 @@ func runWS(res http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	}
 
 	connections[&myConn] = true
-
-	count++
-
-	fmt.Println(count, ": ", &myConn)
 
 	go func() {
 		defer delete(connections, &myConn)
