@@ -22,6 +22,15 @@ func runWS(res http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 
 	connections[&conn] = true
 
+	w := wsutil.NewWriter(conn, ws.StateServerSide, ws.OpText)
+	e := json.NewEncoder(w)
+	e.Encode(map[string]interface{}{"conn": &conn})
+
+	if err := w.Flush(); err != nil {
+		fmt.Println(err)
+		return
+	}
+
 	go func() {
 		defer delete(connections, &conn)
 
@@ -53,6 +62,7 @@ func runWS(res http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 				if connection == &conn {
 					continue
 				}
+				fmt.Println(&conn)
 				w := wsutil.NewWriter(conn, ws.StateServerSide, ws.OpText)
 				e := json.NewEncoder(w)
 				e.Encode(msg)
