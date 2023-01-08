@@ -55,7 +55,7 @@ func runWS(res http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 				}
 				w := wsutil.NewWriter(conn, ws.StateServerSide, ws.OpText)
 				e := json.NewEncoder(w)
-				e.Encode(res)
+				e.Encode(msg)
 
 				if err := w.Flush(); err != nil {
 					fmt.Println(err)
