@@ -18,6 +18,8 @@ func runWS(res http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 		return
 	}
 
+	fmt.Println("online: ", &myConn)
+
 	connections[&myConn] = true
 	serverUserCount[&myConn] = make(map[string]int)
 
@@ -109,6 +111,6 @@ func deleteConnection(myConn *net.Conn) {
 			}
 		}
 	}
-	fmt.Println(myConn)
+	fmt.Println("offline: ", myConn)
 	delete(connections, myConn)
 }
