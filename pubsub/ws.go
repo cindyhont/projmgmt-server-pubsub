@@ -27,8 +27,8 @@ func runWS(res http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 		defer deleteConnection(&myConn)
 
 		var (
-			r       = wsutil.NewReader(myConn, ws.StateServerSide)
-			decoder = json.NewDecoder(r)
+			r = wsutil.NewReader(myConn, ws.StateServerSide)
+			// decoder = json.NewDecoder(r)
 		)
 
 		for {
