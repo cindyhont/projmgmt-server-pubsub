@@ -41,6 +41,8 @@ func runWS(res http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 				return
 			}
 
+			fmt.Println(hdr.OpCode, ws.OpClose, ws.OpPing, ws.OpPong)
+
 			/*
 				if hdr.OpCode == ws.OpPing {
 					continue
@@ -119,4 +121,5 @@ func deleteConnection(myConn *net.Conn) {
 	}
 	fmt.Println("offline: ", myConn)
 	delete(connections, myConn)
+	(*myConn).Close()
 }
