@@ -20,6 +20,8 @@ func runWS(res http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 		return
 	}
 
+	fmt.Println(&myConn)
+
 	connections[&myConn] = true
 
 	go func() {
