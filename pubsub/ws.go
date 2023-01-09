@@ -109,5 +109,6 @@ func deleteConnection(myConn *net.Conn) {
 			}
 		}
 	}
+	fmt.Println(myConn)
 	delete(connections, myConn)
 }
