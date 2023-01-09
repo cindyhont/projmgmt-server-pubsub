@@ -41,33 +41,35 @@ func runWS(res http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 				return
 			}
 
-			if hdr.OpCode == ws.OpPing {
-				continue
-			}
-
-			var msg Message
-			if err := decoder.Decode(&msg); err != nil {
-				return
-			}
-
-			if msg.Type == "" {
-				continue
-			}
-
-			for conn := range connections {
-				if conn == &myConn {
+			/*
+				if hdr.OpCode == ws.OpPing {
 					continue
 				}
 
-				w := wsutil.NewWriter(*conn, ws.StateServerSide, ws.OpText)
-				e := json.NewEncoder(w)
-				e.Encode(msg)
-
-				if err := w.Flush(); err != nil {
-					fmt.Println(err)
+				var msg Message
+				if err := decoder.Decode(&msg); err != nil {
 					return
 				}
-			}
+
+				if msg.Type == "" {
+					continue
+				}
+
+				for conn := range connections {
+					if conn == &myConn {
+						continue
+					}
+
+					w := wsutil.NewWriter(*conn, ws.StateServerSide, ws.OpText)
+					e := json.NewEncoder(w)
+					e.Encode(msg)
+
+					if err := w.Flush(); err != nil {
+						fmt.Println(err)
+						return
+					}
+				}
+			*/
 		}
 	}()
 }
