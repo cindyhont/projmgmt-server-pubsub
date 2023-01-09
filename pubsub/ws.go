@@ -18,8 +18,6 @@ func runWS(res http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 		return
 	}
 
-	fmt.Println("online: ", &myConn)
-
 	connections[&myConn] = true
 	serverUserCount[&myConn] = make(map[string]int)
 
@@ -52,6 +50,8 @@ func runWS(res http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 
 			if msg.Type == "" {
 				continue
+			} else if msg.Type == "user-status" {
+				newUserStatus(&myConn, &msg)
 			}
 
 			for conn := range connections {
@@ -74,22 +74,32 @@ func runWS(res http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 }
 
 func pingWebsocket() {
-	// message has to be map, or the client side will disconnect
-	// interval has to be under 60 seconds
-
-	// myMap := make(map[string]string)
 	for {
 		for conn := range connections {
 			(*conn).Write(ws.CompiledPing)
-			// w := wsutil.NewWriter(*conn, ws.StateServerSide, ws.OpText)
-			// e := json.NewEncoder(w)
-			// e.Encode(myMap)
-
-			// if err := w.Flush(); err != nil {
-			// 	fmt.Println(err)
-			// }
 		}
 		time.Sleep(30 * time.Second)
+	}
+}
+
+func newUserStatus(myConn *net.Conn, msg *Message) {
+	uid := msg.Payload["id"].(string)
+	online := msg.Payload["online"].(bool)
+
+	if online {
+		if count, exists := serverUserCount[myConn][uid]; exists {
+			serverUserCount[myConn][uid] = count + 1
+		} else {
+			serverUserCount[myConn] = map[string]int{uid: 1}
+		}
+	} else {
+		if count, exists := serverUserCount[myConn][uid]; exists {
+			if count > 1 {
+				serverUserCount[myConn][uid] = count - 1
+			} else {
+				delete(serverUserCount[myConn], uid)
+			}
+		}
 	}
 }
 
@@ -99,6 +109,7 @@ func deleteConnection(myConn *net.Conn) {
 		msg := Message{
 			Type:                  "server-disconnect",
 			OtherServersUserCount: serverUserCount[myConn],
+			ToAllRecipients:       true,
 		}
 
 		for conn := range connections {
@@ -116,7 +127,6 @@ func deleteConnection(myConn *net.Conn) {
 			}
 		}
 	}
-	fmt.Println("offline: ", myConn)
 	delete(connections, myConn)
 	(*myConn).Close()
 }
