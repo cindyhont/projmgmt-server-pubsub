@@ -41,6 +41,10 @@ func runWS(res http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 				return
 			}
 
+			if hdr.OpCode == ws.OpPing {
+				continue
+			}
+
 			var msg Message
 			if err := decoder.Decode(&msg); err != nil {
 				return
@@ -75,7 +79,7 @@ func pingWebsocket() {
 	// myMap := make(map[string]string)
 	for {
 		for conn := range connections {
-			(*conn).Write(ws.CompiledPong)
+			(*conn).Write(ws.CompiledPing)
 			// w := wsutil.NewWriter(*conn, ws.StateServerSide, ws.OpText)
 			// e := json.NewEncoder(w)
 			// e.Encode(myMap)
