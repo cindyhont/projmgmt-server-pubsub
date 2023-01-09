@@ -49,10 +49,13 @@ func runWS(res http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 				continue
 			}
 
+			fmt.Println(msg)
+
 			for conn := range connections {
 				if conn == &myConn {
 					continue
 				}
+
 				w := wsutil.NewWriter(*conn, ws.StateServerSide, ws.OpText)
 				e := json.NewEncoder(w)
 				e.Encode(msg)
