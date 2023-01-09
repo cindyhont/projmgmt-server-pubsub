@@ -27,8 +27,8 @@ func runWS(res http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 		defer deleteConnection(&myConn)
 
 		var (
-			r = wsutil.NewReader(myConn, ws.StateServerSide)
-			// decoder = json.NewDecoder(r)
+			r       = wsutil.NewReader(myConn, ws.StateServerSide)
+			decoder = json.NewDecoder(r)
 		)
 
 		for {
@@ -41,37 +41,34 @@ func runWS(res http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 				return
 			}
 
-			fmt.Println(hdr.OpCode, ws.OpClose, ws.OpPing, ws.OpPong)
+			if hdr.OpCode == ws.OpPong {
+				continue
+			}
 
-			/*
-				if hdr.OpCode == ws.OpPing {
+			var msg Message
+			if err := decoder.Decode(&msg); err != nil {
+				return
+			}
+
+			if msg.Type == "" {
+				continue
+			}
+
+			for conn := range connections {
+				if conn == &myConn {
 					continue
 				}
 
-				var msg Message
-				if err := decoder.Decode(&msg); err != nil {
+				w := wsutil.NewWriter(*conn, ws.StateServerSide, ws.OpText)
+				e := json.NewEncoder(w)
+				e.Encode(msg)
+
+				if err := w.Flush(); err != nil {
+					fmt.Println(err)
 					return
 				}
+			}
 
-				if msg.Type == "" {
-					continue
-				}
-
-				for conn := range connections {
-					if conn == &myConn {
-						continue
-					}
-
-					w := wsutil.NewWriter(*conn, ws.StateServerSide, ws.OpText)
-					e := json.NewEncoder(w)
-					e.Encode(msg)
-
-					if err := w.Flush(); err != nil {
-						fmt.Println(err)
-						return
-					}
-				}
-			*/
 		}
 	}()
 }
