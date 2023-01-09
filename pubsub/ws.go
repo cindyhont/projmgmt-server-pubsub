@@ -75,7 +75,7 @@ func pingWebsocket() {
 	// myMap := make(map[string]string)
 	for {
 		for conn := range connections {
-			(*conn).Write(ws.CompiledPing)
+			(*conn).Write(ws.CompiledPong)
 			// w := wsutil.NewWriter(*conn, ws.StateServerSide, ws.OpText)
 			// e := json.NewEncoder(w)
 			// e.Encode(myMap)
